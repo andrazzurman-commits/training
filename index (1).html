@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>PROGRAM — VO2max Blok</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:#0a0a0a;font-family:'SF Mono','Fira Code','JetBrains Mono','Courier New',monospace;color:#e0e0e0;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+input,textarea,button,select{font-family:inherit}
+input:focus,textarea:focus{outline:none;border-color:#ff3b30!important}
+button{cursor:pointer}
+button:active{transform:scale(.97)}
+
+#app{max-width:480px;margin:0 auto;padding-bottom:40px;min-height:100vh}
+.hdr{padding:20px 20px 14px;display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1px solid #1a1a1a}
+.hdr h1{font-size:26px;font-weight:900;color:#fff;letter-spacing:4px;line-height:1}
+.hdr .sub{margin-top:5px;font-size:11px;color:#666;letter-spacing:1px}
+.wk-badge{background:#ff3b30;color:#fff;padding:5px 10px;border-radius:8px;font-size:13px;font-weight:800}
+
+.nav{display:flex;gap:2px;padding:6px 14px;border-bottom:1px solid #1a1a1a;position:sticky;top:0;background:#0a0a0a;z-index:10}
+.nav button{flex:1;padding:7px 3px;background:0;border:0;color:#666;font-size:10px;font-weight:700;letter-spacing:.5px;border-radius:7px;display:flex;flex-direction:column;align-items:center;gap:2px;transition:.2s}
+.nav button.on{color:#fff;background:#1a1a1a}
+.nav button i{font-style:normal;font-size:14px}
+
+.ct{padding:14px 18px}
+.sbar{padding:10px 18px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #1a1a1a}
+
+.crd{padding:13px 15px;background:#111;border-radius:11px;margin-bottom:7px;border:1px solid #1a1a1a;cursor:pointer;transition:.15s}
+.crd:active{transform:scale(.98)}
+.crd.today{border-color:#ff3b30;background:#1a0a0a}
+.crd.done{border-color:#34c75940;background:#0a1a0a}
+
+.dl{display:inline-block;padding:2px 7px;border-radius:5px;font-size:10px;font-weight:800;color:#fff;letter-spacing:1px}
+.tag-today{font-size:9px;font-weight:800;color:#ff3b30;letter-spacing:1px;margin-left:6px}
+.sdot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:7px;vertical-align:middle}
+
+.scrd{background:#111;border-radius:11px;padding:16px;margin-bottom:10px;border:1px solid #1a1a1a}
+.cbadge{background:#34c75920;color:#34c759;padding:3px 9px;border-radius:5px;font-size:10px;font-weight:700}
+
+.btn{width:100%;padding:11px;background:0;border:1.5px solid;border-radius:9px;font-size:13px;font-weight:700}
+.btn-red{background:#ff3b30;border-color:#ff3b30;color:#fff}
+.btn-ghost{border-color:#333;color:#888}
+
+.fi{width:100%;padding:11px;background:#0a0a0a;border:1px solid #333;border-radius:7px;color:#fff;font-size:15px}
+.ft{width:100%;padding:11px;background:#0a0a0a;border:1px solid #333;border-radius:7px;color:#fff;font-size:13px;min-height:60px;resize:vertical}
+.fl{display:block;font-size:11px;font-weight:700;color:#888;margin-bottom:5px;letter-spacing:.5px}
+.fg{margin-bottom:12px}
+
+.mt{font-size:12px;font-weight:700;color:#fff;background:#1a1a1a;padding:3px 9px;border-radius:5px;border:1px solid #333;display:inline-block;margin:2px}
+.meal-row{padding:10px 0;border-bottom:1px solid #1a1a1a}
+.meal-card{background:#111;border-radius:10px;padding:14px;margin-bottom:7px;border:1px solid #1a1a1a}
+
+.chart-box{background:#111;border-radius:11px;padding:16px;margin-bottom:10px;border:1px solid #1a1a1a}
+.chart-box h4{margin:0 0 12px;font-size:12px;font-weight:700;color:#999;letter-spacing:.5px}
+
+.sunday{display:flex;align-items:center;gap:10px;padding:14px;background:#1a1a0a;border-radius:11px;margin-bottom:10px;border:1px solid #333300}
+.fishing-notice{padding:12px 14px;background:#0a1a2a;border:1px solid #007aff40;border-radius:11px;margin-bottom:14px;color:#66aaff;font-size:13px}
+
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:10px 22px;border-radius:11px;font-size:13px;font-weight:700;border:1px solid #333;z-index:100;box-shadow:0 6px 24px rgba(0,0,0,.5);transition:opacity .3s}
+
+.back-btn{background:0;border:0;color:#666;font-size:12px;padding:3px 0;margin-bottom:14px}
+
+.plan-btn{flex:1;padding:9px;border:1px solid #333;border-radius:7px;font-size:12px;font-weight:700;background:#1a1a1a;color:#888;transition:.2s}
+.plan-btn.on{background:#ff3b30;color:#fff;border-color:#ff3b30}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+
+.deload-banner{padding:12px 14px;background:#1a1a0a;border:1px solid #ffcc0040;border-radius:11px;margin-bottom:10px;color:#ffcc00;font-size:13px}
+.eval-banner{padding:12px 14px;background:#0a0a1a;border:1px solid #007aff40;border-radius:11px;margin-bottom:10px;color:#66aaff;font-size:13px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+// ============================================
+// DATA
+// ============================================
+var SK = "training_program_v2";
+
+function getVO2maxScheme(week) {
+  if (week === 7) return { sets: 3, dur: 3, rest: 3, label: "DELOAD 3×3 min" };
+  if (week <= 2) return { sets: 4, dur: 4, rest: 3, label: "4×4 min (3 min odmor)" };
+  if (week <= 4) return { sets: 5, dur: 3, rest: 2.5, label: "5×3 min (2.5 min odmor)" };
+  if (week <= 6) return { sets: 6, dur: 3, rest: 2, label: "6×3 min (2 min odmor)" };
+  return { sets: 4, dur: 4, rest: 3, label: "4×4 min (3 min odmor)" };
+}
+
+function getLongRunMin(week) {
+  if (week === 7) return 45;
+  var mins = [60, 65, 70, 75, 80, 85, 90];
+  return mins[Math.min(week - 1, 6)];
+}
+
+function getStrengthRounds(week) {
+  if (week === 7) return 3;
+  if (week <= 3) return 4;
+  return 5;
+}
+
+function isDeload(week) { return week === 7; }
+function isEval(week) { return week === 8; }
+
+function buildWeek(week) {
+  var v = getVO2maxScheme(week);
+  var lr = getLongRunMin(week);
+  var sr = getStrengthRounds(week);
+  var dl = isDeload(week);
+
+  return [
+    {
+      day: "PON", dayFull: "Ponedeljek", nType: "vo2max",
+      sessions: [{
+        type: "VO2max", title: "VO2max AirDyne — " + v.label, color: "#ff3b30",
+        desc: v.sets + "×" + v.dur + " min ALL-OUT · HR: 163-172 bpm",
+        details: [
+          "Ogrevanje: 5 min lahno vrtenje",
+          v.sets + " × " + v.dur + " min na RPE " + (dl ? "6-7" : "8-9") + ", max watts",
+          "🔴 Target HR: 163-172 bpm",
+          v.rest + " min zelo lahno vrtenje med intervali",
+          "Ohlajanje: 5 min",
+          "Skupaj: ~" + (v.sets * v.dur + v.sets * v.rest + 10) + " min"
+        ],
+        metrics: ["duration", "avgHR", "rpe", "intervals_completed", "avgWatts"]
+      }]
+    },
+    {
+      day: "TOR", dayFull: "Torek", nType: "training",
+      sessions: [
+        { type: "Easy", title: "Lahek aerobni tek", color: "#34c759",
+          desc: (dl ? "30" : "40-50") + " min · HR: 118-136 bpm",
+          details: ["Tempo: 6:30-7:00/km", "💚 Target HR: 118-136 bpm — ne preseči!", "Skupaj: " + (dl ? "30" : "40-50") + " min"],
+          metrics: ["duration", "distance", "avgHR", "rpe"] },
+        { type: "Strength", title: "Vzdržljivostna moč — Zgornji del", color: "#af52de",
+          desc: sr + " krogi, nižja teža, višje ponovitve",
+          details: [sr + " krogi, 45s odmor med vajami, 90s med krogi:", "• Sklece na TRX/obročih × 15-20", "• Pull-up (brez pasu!) × 12-15", "• Dips (brez pasu!) × 15-20", "• KB press 2×16kg × 12/roko", "• Face pulls z elastiko × 20", "• Plank 45s"],
+          metrics: ["rounds", "rpe", "notes"] }
+      ]
+    },
+    {
+      day: "SRE", dayFull: "Sreda", nType: "training",
+      sessions: [
+        { type: "Threshold", title: dl ? "Lahek tek (deload)" : "Tempo/Threshold tek", color: "#ff9500",
+          desc: dl ? "30 min lahek · HR: 118-136 bpm" : "25-35 min · HR: 145-159 bpm",
+          details: dl
+            ? ["30 min lahek tek @ pogovorni tempo", "💚 HR: 118-136 bpm", "Deload — brez tempa!"]
+            : ["Ogrevanje: 10 min lahek tek", "20-25 min tempo @ RPE 7", "🟠 Target HR: 145-159 bpm", "Ohlajanje: 5-10 min"],
+          metrics: ["duration", "distance", "avgHR", "rpe"] },
+        { type: "Strength", title: "Vzdržljivostna moč — Full Body", color: "#af52de",
+          desc: sr + " krogi, celotelo",
+          details: [sr + " krogi, 45s odmor:", "• KB clean & press 2×16kg × 10/roko", "• Pull-up wide grip × 10-12", "• KB swing 32kg × 15", "• Sklece z dvigom × 12-15", "• Farmer carry 2×24kg × 40m", "• Turkish get-up 16kg × 3/stran"],
+          metrics: ["rounds", "rpe", "notes"] }
+      ]
+    },
+    {
+      day: "ČET", dayFull: "Četrtek", nType: "training",
+      sessions: [
+        { type: "Easy", title: "Lahek aerobni tek", color: "#34c759",
+          desc: (dl ? "30" : "40-50") + " min · HR: 118-136 bpm",
+          details: ["Tempo: 6:30-7:00/km", "💚 Target HR: 118-136 bpm", "Skupaj: " + (dl ? "30" : "40-50") + " min"],
+          metrics: ["duration", "distance", "avgHR", "rpe"] },
+        { type: "Strength", title: "Vzdržljivostna moč — Spodnji del + Core", color: "#af52de",
+          desc: sr + " krogi, nižja teža",
+          details: [sr + " krogi, 45s odmor:", "• Goblet squat 24-32kg × 15-20", "• Romanian DL 60-70kg × 12-15", "• Walking lunges × 12/nogo", "• KB swing 24kg × 20", "• Step-up na klop × 10/nogo", "• Hollow body hold 30-45s"],
+          metrics: ["rounds", "rpe", "notes"] }
+      ]
+    },
+    {
+      day: "PET", dayFull: "Petek", nType: "vo2max",
+      sessions: [{
+        type: "VO2max", title: "VO2max AirDyne — Varianta", color: "#ff3b30",
+        desc: v.label + " · HR: 163-172 bpm",
+        details: [
+          "Trenutni protokol: " + v.label,
+          v.sets + " × " + v.dur + " min @ RPE " + (dl ? "6-7" : "8-9"),
+          "🔴 Target HR: 163-172 bpm",
+          "Beležij watts — benchmark!",
+          "Skupaj: ~" + (v.sets * v.dur + v.sets * v.rest + 10) + " min"
+        ],
+        metrics: ["duration", "avgHR", "rpe", "intervals_completed", "avgWatts"]
+      }]
+    },
+    {
+      day: "SOB", dayFull: "Sobota", nType: "training",
+      sessions: [{
+        type: "Long", title: "Dolgi aerobni tek", color: "#007aff",
+        desc: lr + " min · HR: 118-127 bpm",
+        details: ["Tempo: 6:30-7:30/km, sproščeno", "💙 Target HR: 118-127 bpm", "Fokus: čas na nogah, ne hitrost", "Hidracija!", "Skupaj: " + lr + " min"],
+        metrics: ["duration", "distance", "avgHR", "rpe"]
+      }]
+    }
+  ];
+}
+
+var NUTR = {
+  vo2max: { label: "VO2max dan", tag: "🔴 VISOK OH", tc: "#ff3b30", kcal: 2750, p: 200, f: 85, c: 270, meals: [
+    { t: "07:00", n: "Zajtrk", i: "4 jajca scrambled + 2 riževa vaflja + 1 banana + 15g maslo", m: "P:32 M:22 OH:55 ~540kcal" },
+    { t: "10:00", n: "Malica 1", i: "40g ovseni kosmiči + 200ml mleko + 30g whey + 1 žlica medu", m: "P:38 M:8 OH:52 ~430kcal" },
+    { t: "12:30", n: "Kosilo", i: "200g piščanec + 250g riž + zelenjava + 1 žlica olivno olje", m: "P:50 M:16 OH:75 ~650kcal" },
+    { t: "16:00", n: "Malica 2", i: "200g grški jogurt + 40g granola + 100g borovnice", m: "P:25 M:12 OH:38 ~360kcal" },
+    { t: "19:30", n: "Večerja", i: "200g postrv + 200g sladki krompir + solata + avokado (½)", m: "P:42 M:24 OH:40 ~540kcal" },
+    { t: "21:00", n: "Pred spanjem", i: "250g skuta + 15g bučna semena", m: "P:33 M:8 OH:7 ~230kcal" }
+  ]},
+  training: { label: "Trening dan", tag: "🟠 ZMEREN OH", tc: "#ff9500", kcal: 2550, p: 200, f: 85, c: 220, meals: [
+    { t: "07:00", n: "Zajtrk", i: "3 jajca + 2 rezini kruha + avokado (½) + paradižnik", m: "P:28 M:24 OH:30 ~450kcal" },
+    { t: "10:00", n: "Malica 1", i: "30g whey + 1 banana + 15g arašidovo maslo", m: "P:30 M:9 OH:32 ~330kcal" },
+    { t: "13:00", n: "Kosilo", i: "200g piščanec/puran + 200g riž/kvinoja + zelenjava + olje", m: "P:48 M:16 OH:55 ~560kcal" },
+    { t: "16:00", n: "Malica 2", i: "150g grški jogurt + 30g bučna semena + 50g borovnice", m: "P:20 M:15 OH:15 ~275kcal" },
+    { t: "19:30", n: "Večerja", i: "200g brancin/tuna + 150g sladki krompir + solata + olje", m: "P:45 M:14 OH:38 ~460kcal" },
+    { t: "21:00", n: "Pred spanjem", i: "250g skuta + 10g bučna semena + cimet", m: "P:33 M:7 OH:5 ~215kcal" }
+  ]},
+  rest: { label: "Počitek dan", tag: "🟢 NIZEK OH", tc: "#34c759", kcal: 2350, p: 200, f: 90, c: 170, meals: [
+    { t: "08:00", n: "Zajtrk", i: "4 jajca omleta + špinat + feta 30g + ½ avokado", m: "P:34 M:30 OH:6 ~430kcal" },
+    { t: "11:00", n: "Malica 1", i: "30g whey + 200ml ovseno mleko + arašidovo maslo", m: "P:30 M:12 OH:10 ~265kcal" },
+    { t: "13:30", n: "Kosilo", i: "200g piščanec + solata + olivno olje + 100g čičerika", m: "P:48 M:16 OH:28 ~450kcal" },
+    { t: "16:00", n: "Malica 2", i: "150g jogurt + 20g bučna semena + 30g čokolada 85%", m: "P:17 M:17 OH:18 ~295kcal" },
+    { t: "19:00", n: "Večerja", i: "200g postrv + brokolija na žaru + 150g krompir + maslo", m: "P:42 M:20 OH:30 ~470kcal" },
+    { t: "21:00", n: "Pred spanjem", i: "250g skuta + cimet + 10g bučna semena", m: "P:33 M:7 OH:5 ~215kcal" }
+  ]}
+};
+
+var SHOP = {
+  weekly: { label: "📦 Tedenski nakup", sub: "Enkrat — traja cel teden", color: "#00bcd4", cats: [
+    { cat: "🌾 OH", items: [
+      ["Riž (basmati)", "600g"], ["Sladki krompir", "1 kg"], ["Krompir", "200g"], ["Ovseni kosmiči", "100g"],
+      ["Polnozrnat kruh", "1 štruca"], ["Riževi vaflji", "1 pak"], ["Granola", "100g"], ["Čičerika", "1 konzerva"]
+    ]},
+    { cat: "🥑 Maščobe & Semena", items: [
+      ["Olivno olje", "500ml"], ["Arašidovo maslo", "1 koz"], ["Bučna semena", "250g"], ["Čokolada 85%", "1 tab"]
+    ]},
+    { cat: "💪 Suplementi", items: [
+      ["Whey protein", "250g"], ["Med", "1 koz"], ["Cimet", "1 pak"], ["Maslo", "50g"]
+    ]}
+  ]},
+  monWed: { label: "🛒 Nakup 1: PON–SRE", sub: "Sveže za 3 dni", color: "#ff3b30", cats: [
+    { cat: "🥩 Meso & Riba", items: [["Piščančja prsa", "600g"], ["Postrv fileti", "200g"], ["Brancin/tuna", "400g"]] },
+    { cat: "🥚 Mlečno", items: [["Jajca", "10 kos"], ["Skuta", "750g"], ["Grški jogurt", "500g"], ["Mleko", "200ml"]] },
+    { cat: "🥬 Zelenjava", items: [["Banane", "3 kos"], ["Borovnice", "200g"], ["Avokado", "2 kos"], ["Paradižniki+Solata", "2+1 pak"]] }
+  ]},
+  thuSun: { label: "🛒 Nakup 2: ČET–NED", sub: "Sveže za 4 dni", color: "#ff9500", cats: [
+    { cat: "🥩 Meso & Riba", items: [["Piščančja prsa", "800g"], ["Postrv fileti", "400g"], ["Brancin/tuna", "400g"]] },
+    { cat: "🥚 Mlečno", items: [["Jajca", "14 kos"], ["Skuta", "1 kg"], ["Grški jogurt", "650g"], ["Mleko", "200ml"], ["Ovseno mleko", "200ml"], ["Feta", "30g"]] },
+    { cat: "🥬 Zelenjava", items: [["Banane", "3 kos"], ["Borovnice", "200g"], ["Avokado", "2 kos"], ["Špinat", "100g"], ["Brokolija", "300g"], ["Paradižniki+Solata", "2+2 pak"]] }
+  ]}
+};
+
+var ML = {
+  duration: "Trajanje (min)", distance: "Razdalja (km)", avgHR: "Povp. HR",
+  rpe: "RPE (1-10)", intervals_completed: "Intervali", avgWatts: "Povp. Watts",
+  rounds: "Krogi", notes: "Opombe"
+};
+
+// ============================================
+// STATE
+// ============================================
+var S = { view: "week", selDay: null, selSess: null, form: {}, nutrForm: {}, selMeal: null };
+
+function load() {
+  try { var d = localStorage.getItem(SK); return d ? JSON.parse(d) : null; } catch(e) { return null; }
+}
+function save(d) {
+  try { localStorage.setItem(SK, JSON.stringify(d)); } catch(e) {}
+}
+function getData() {
+  var d = load();
+  if (d && d.logs !== undefined) return d;
+  var init = { week: 1, logs: [], nutritionLogs: [], fishingDays: [], bodyWeight: [{date: todayStr(), weight: 99}], tenKm: [{date: todayStr(), time: 55}] };
+  save(init);
+  return init;
+}
+
+function todayStr() { return new Date().toISOString().split("T")[0]; }
+function todayDayIdx() { var d = new Date().getDay(); return d === 0 ? null : d - 1; } // 0=PON...5=SOB, null=NED
+function todayNType() { var i = todayDayIdx(); if (i === null) return "rest"; return buildWeek(1)[i].nType; }
+
+// ============================================
+// TOAST
+// ============================================
+function toast(msg) {
+  var el = document.getElementById("toast");
+  if (!el) { el = document.createElement("div"); el.id = "toast"; el.className = "toast"; document.body.appendChild(el); }
+  el.textContent = msg; el.style.opacity = "1";
+  setTimeout(function() { el.style.opacity = "0"; }, 2200);
+}
+
+// ============================================
+// RENDER
+// ============================================
+function h(tag, attrs, children) {
+  var el = document.createElement(tag);
+  if (attrs) Object.keys(attrs).forEach(function(k) {
+    if (k === "style" && typeof attrs[k] === "object") Object.assign(el.style, attrs[k]);
+    else if (k.startsWith("on")) el[k.toLowerCase()] = attrs[k];
+    else if (k === "className") el.className = attrs[k];
+    else if (k === "innerHTML") el.innerHTML = attrs[k];
+    else el.setAttribute(k, attrs[k]);
+  });
+  if (children) {
+    if (!Array.isArray(children)) children = [children];
+    children.forEach(function(c) {
+      if (c == null) return;
+      if (typeof c === "string" || typeof c === "number") el.appendChild(document.createTextNode(c));
+      else el.appendChild(c);
+    });
+  }
+  return el;
+}
+
+function render() {
+  var D = getData();
+  var W = buildWeek(D.week);
+  var app = document.getElementById("app");
+  app.innerHTML = "";
+
+  // Header
+  var hdr = h("div", {className: "hdr"}, [
+    h("div", null, [
+      h("h1", null, "PROGRAM"),
+      h("div", {className: "sub"}, "Teden " + D.week + " · VO2max Blok · Cut" + (isDeload(D.week) ? " · DELOAD" : "") + (isEval(D.week) ? " · EVALUACIJA" : ""))
+    ]),
+    h("div", {className: "wk-badge"}, "T" + D.week)
+  ]);
+  app.appendChild(hdr);
+
+  // Nav
+  var tabs = [["week","📋","TEDEN"],["food","🥩","HRANA"],["progress","📈","NAPREDEK"],["settings","⚙️","ORODJA"]];
+  var nav = h("div", {className: "nav"});
+  tabs.forEach(function(t) {
+    var btn = h("button", {className: S.view === t[0] ? "on" : "", onClick: function() { S.view = t[0]; S.selDay = null; S.selSess = null; S.selMeal = null; render(); }}, [
+      h("i", null, t[1]), h("span", null, t[2])
+    ]);
+    nav.appendChild(btn);
+  });
+  app.appendChild(nav);
+
+  if (S.view === "week") renderWeek(D, W);
+  else if (S.view === "food") renderFood(D);
+  else if (S.view === "progress") renderProgress(D);
+  else if (S.view === "settings") renderSettings(D);
+}
+
+// ============================================
+// WEEK VIEW
+// ============================================
+function logsForDay(D, dayIdx) {
+  var ds = todayStr();
+  return (D.logs || []).filter(function(l) { return l.date === ds && l.dayIdx === dayIdx; });
+}
+function dayDone(D, dayIdx, W) { return logsForDay(D, dayIdx).length >= W[dayIdx].sessions.length; }
+function weekStats(D) {
+  var wl = D.logs.filter(function(l) { return l.week === D.week; });
+  return { total: wl.length,
+    vo2max: wl.filter(function(l){return l.sType==="VO2max"}).length,
+    easy: wl.filter(function(l){return l.sType==="Easy"}).length,
+    threshold: wl.filter(function(l){return l.sType==="Threshold"}).length,
+    strength: wl.filter(function(l){return l.sType==="Strength"}).length,
+    long: wl.filter(function(l){return l.sType==="Long"}).length
+  };
+}
+
+function renderWeek(D, W) {
+  var ct = h("div", {className: "ct"});
+  var ti = todayDayIdx();
+
+  if (S.selDay !== null && S.selSess !== null) { renderLogForm(D, W, ct); app.appendChild(ct); return; }
+  if (S.selDay !== null) { renderDayDetail(D, W, ct); app.appendChild(ct); return; }
+
+  // Stats bar
+  var ws = weekStats(D);
+  var sb = h("div", {className: "sbar"}, [
+    h("div", null, [
+      h("span", {style:{fontSize:"22px",fontWeight:"900",color:"#fff"}}, String(ws.total)),
+      h("span", {style:{fontSize:"11px",color:"#666"}}, " / 9 treningov")
+    ])
+  ]);
+  app.appendChild(sb);
+
+  // Deload/eval banners
+  if (isDeload(D.week)) ct.appendChild(h("div", {className: "deload-banner"}, [h("strong", null, "⚡ Deload teden"), h("p", {style:{margin:"4px 0 0",fontSize:"12px"}}, "Zmanjšan volumen. 3 krogi moči, krajši teki, 3×3 AirDyne. Regeneracija!")]));
+  if (isEval(D.week)) ct.appendChild(h("div", {className: "eval-banner"}, [h("strong", null, "📊 Evaluacija"), h("p", {style:{margin:"4px 0 0",fontSize:"12px"}}, "Pojdi v Claude chat — pokaži napredek, naredimo nov blok!")]));
+
+  // Sunday
+  if (ti === null) ct.appendChild(h("div", {className: "sunday"}, [h("span", {style:{fontSize:"22px"}}, "🛋️"), h("div", null, [h("strong", null, "Nedelja — POČITEK"), h("p", {style:{fontSize:"12px",color:"#999",margin:0}}, "Regeneracija. Sprehod, raztezanje, sauna.")])]));
+
+  // Day cards
+  W.forEach(function(day, i) {
+    var done = dayDone(D, i, W);
+    var isT = i === ti;
+    var cls = "crd" + (isT ? " today" : "") + (done ? " done" : "");
+    var card = h("div", {className: cls, onClick: function() { S.selDay = i; S.selSess = null; render(); }});
+
+    var top = h("div", {style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"6px"}});
+    var left = h("div", {style:{display:"flex",alignItems:"center",gap:"6px"}});
+    left.appendChild(h("span", {className: "dl", style:{background: isT ? "#ff3b30" : done ? "#34c759" : "#333"}}, day.day));
+    if (isT) left.appendChild(h("span", {className: "tag-today"}, "DANES"));
+    if (done) left.appendChild(h("span", null, "✓"));
+    top.appendChild(left);
+    top.appendChild(h("span", {style:{color:"#666",fontSize:"16px"}}, "›"));
+    card.appendChild(top);
+
+    day.sessions.forEach(function(ss) {
+      var row = h("div", {style:{display:"flex",alignItems:"center",marginTop:"3px"}});
+      row.appendChild(h("span", {className: "sdot", style:{background: ss.color}}));
+      row.appendChild(h("span", {style:{fontSize:"12px",color:"#999"}}, ss.title));
+      card.appendChild(row);
+    });
+    ct.appendChild(card);
+  });
+
+  // Advance week button
+  var advBtn = h("button", {className: "btn btn-ghost", style:{marginTop:"10px"}, onClick: function() {
+    D.week++;
+    save(D);
+    toast("Teden " + D.week + " začet!");
+    render();
+  }}, "Zaključi teden " + D.week + " → Teden " + (D.week + 1));
+  ct.appendChild(advBtn);
+
+  app.appendChild(ct);
+}
+
+function renderDayDetail(D, W, ct) {
+  var day = W[S.selDay];
+  ct.appendChild(h("button", {className: "back-btn", onClick: function() { S.selDay = null; render(); }}, "← Nazaj"));
+
+  var hdr = h("div", {style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"14px"}});
+  hdr.appendChild(h("h2", {style:{color:"#fff",fontSize:"20px",fontWeight:800}}, day.dayFull));
+  ct.appendChild(hdr);
+
+  day.sessions.forEach(function(sess, si) {
+    var logged = logsForDay(D, S.selDay).some(function(l) { return l.sessIdx === si; });
+    var sc = h("div", {className: "scrd", style:{borderLeft: "4px solid " + sess.color}});
+
+    var top = h("div", {style:{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:"12px"}});
+    var info = h("div");
+    info.appendChild(h("h3", {style:{margin:0,fontSize:"15px",color:"#fff"}}, sess.title));
+    info.appendChild(h("p", {style:{margin:"3px 0 0",fontSize:"12px",color:"#999"}}, sess.desc));
+    top.appendChild(info);
+    if (logged) top.appendChild(h("span", {className: "cbadge"}, "✓ OPRAVLJENO"));
+    sc.appendChild(top);
+
+    sess.details.forEach(function(d) { sc.appendChild(h("p", {style:{margin:"0 0 5px",fontSize:"12px",color:"#999",lineHeight:"1.4"}}, d)); });
+
+    if (!logged) {
+      var btn = h("button", {className: "btn", style:{borderColor: sess.color, color: sess.color, marginTop:"12px"}, onClick: function() { S.selSess = si; S.form = {}; render(); }}, "Zabeleži trening →");
+      sc.appendChild(btn);
+    }
+    ct.appendChild(sc);
+  });
+}
+
+function renderLogForm(D, W, ct) {
+  var sess = W[S.selDay].sessions[S.selSess];
+  ct.appendChild(h("button", {className: "back-btn", onClick: function() { S.selSess = null; render(); }}, "← Nazaj"));
+
+  var card = h("div", {className: "scrd"});
+  card.appendChild(h("h3", {style:{color:"#fff",margin:"0 0 3px",fontSize:"15px"}}, sess.title));
+  card.appendChild(h("p", {style:{color:"#999",margin:"0 0 16px",fontSize:"12px"}}, sess.desc));
+
+  sess.metrics.forEach(function(mk) {
+    var fg = h("div", {className: "fg"});
+    fg.appendChild(h("label", {className: "fl"}, ML[mk] || mk));
+    if (mk === "notes") {
+      var ta = h("textarea", {className: "ft", placeholder: "Kako si se počutil..."});
+      ta.value = S.form[mk] || "";
+      ta.oninput = function() { S.form[mk] = ta.value; };
+      fg.appendChild(ta);
+    } else {
+      var inp = h("input", {className: "fi", type: "number", placeholder: mk === "avgWatts" ? "280" : mk === "rpe" ? "8" : ""});
+      inp.value = S.form[mk] || "";
+      inp.oninput = function() { S.form[mk] = inp.value; };
+      fg.appendChild(inp);
+    }
+    card.appendChild(fg);
+  });
+
+  var fg2 = h("div", {className: "fg"});
+  fg2.appendChild(h("label", {className: "fl"}, "Opombe (opcijsko)"));
+  var ta2 = h("textarea", {className: "ft", placeholder: "Splošne opombe..."});
+  ta2.value = S.form.generalNotes || "";
+  ta2.oninput = function() { S.form.generalNotes = ta2.value; };
+  fg2.appendChild(ta2);
+  card.appendChild(fg2);
+
+  var saveBtn = h("button", {className: "btn btn-red", onClick: function() {
+    var log = { date: todayStr(), week: D.week, dayIdx: S.selDay, sessIdx: S.selSess, sType: sess.type, sTitle: sess.title, metrics: Object.assign({}, S.form), ts: Date.now() };
+    D.logs.push(log);
+    save(D);
+    S.form = {}; S.selDay = null; S.selSess = null;
+    toast("💪 Trening zabeležen!");
+    render();
+  }}, "💪 Zabeleži");
+  card.appendChild(saveBtn);
+  ct.appendChild(card);
+}
+
+// ============================================
+// FOOD VIEW
+// ============================================
+function renderFood(D) {
+  var ct = h("div", {className: "ct"});
+
+  if (S.selMeal === "shopping") { renderShopping(ct); app.appendChild(ct); return; }
+  if (S.selMeal && NUTR[S.selMeal]) { renderMealDetail(S.selMeal, ct); app.appendChild(ct); return; }
+
+  ct.appendChild(h("h2", {style:{color:"#fff",margin:"0 0 3px",fontSize:"18px"}}, "Prehrana"));
+  ct.appendChild(h("p", {style:{color:"#666",fontSize:"11px",margin:"0 0 14px"}}, "Cut · Carb cycling · 200g P · Brez lososa/oreščkov/mandljev"));
+
+  // Today's plan
+  var nt = NUTR[todayNType()];
+  var today_card = h("div", {className: "scrd", style:{borderLeft: "4px solid " + nt.tc}});
+  var top = h("div", {style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"8px"}});
+  top.appendChild(h("h3", {style:{margin:0,fontSize:"15px",color:"#fff"}}, "Današnji plan"));
+  top.appendChild(h("span", {style:{background:nt.tc+"20",color:nt.tc,padding:"3px 8px",borderRadius:"5px",fontSize:"10px",fontWeight:700}}, nt.tag));
+  today_card.appendChild(top);
+
+  var macros = h("div", {style:{display:"flex",gap:"8px",marginBottom:"10px",flexWrap:"wrap"}});
+  macros.appendChild(h("span", {className: "mt"}, nt.kcal + " kcal"));
+  macros.appendChild(h("span", {className: "mt", style:{color:"#ff6b6b"}}, "P:" + nt.p + "g"));
+  macros.appendChild(h("span", {className: "mt", style:{color:"#ffd43b"}}, "M:" + nt.f + "g"));
+  macros.appendChild(h("span", {className: "mt", style:{color:"#69db7c"}}, "OH:" + nt.c + "g"));
+  today_card.appendChild(macros);
+
+  nt.meals.forEach(function(meal) {
+    var row = h("div", {className: "meal-row"});
+    row.appendChild(h("div", {style:{color:"#fff",fontSize:"13px",fontWeight:600}}, meal.t + " · " + meal.n));
+    row.appendChild(h("p", {style:{margin:"3px 0 1px",fontSize:"12px",color:"#ccc"}}, meal.i));
+    row.appendChild(h("p", {style:{margin:0,fontSize:"10px",color:"#666"}}, meal.m));
+    today_card.appendChild(row);
+  });
+  ct.appendChild(today_card);
+
+  // All plans
+  ct.appendChild(h("h3", {style:{color:"#999",fontSize:"12px",margin:"16px 0 8px",letterSpacing:"1px"}}, "VSI JEDILNIKI"));
+  ["vo2max","training","rest"].forEach(function(key) {
+    var p = NUTR[key];
+    var card = h("div", {className: "crd", style:{borderLeft:"3px solid "+p.tc}, onClick: function() { S.selMeal = key; render(); }});
+    var row = h("div", {style:{display:"flex",justifyContent:"space-between",alignItems:"center"}});
+    var info = h("div");
+    info.appendChild(h("span", {style:{color:"#fff",fontSize:"14px",fontWeight:600}}, p.label));
+    info.appendChild(h("div", {style:{marginTop:"3px"}}, [h("span", {style:{color:"#999",fontSize:"11px"}}, p.kcal + " kcal · P:" + p.p + " M:" + p.f + " OH:" + p.c)]));
+    row.appendChild(info);
+    row.appendChild(h("span", {style:{color:"#666"}}, "›"));
+    card.appendChild(row);
+    ct.appendChild(card);
+  });
+
+  // Shopping
+  var shopCard = h("div", {className: "crd", style:{borderLeft:"3px solid #00bcd4",marginTop:"14px"}, onClick: function() { S.selMeal = "shopping"; render(); }});
+  shopCard.appendChild(h("div", {style:{display:"flex",justifyContent:"space-between",alignItems:"center"}}, [
+    h("div", null, [h("span", {style:{color:"#fff",fontSize:"14px",fontWeight:600}}, "🛒 Nakupovalni seznam"), h("div", {style:{marginTop:"3px"}}, [h("span", {style:{color:"#999",fontSize:"11px"}}, "Tedenski + 2× sveži nakup")])]),
+    h("span", {style:{color:"#666"}}, "›")
+  ]));
+  ct.appendChild(shopCard);
+
+  // Nutrition log
+  ct.appendChild(h("h3", {style:{color:"#999",fontSize:"12px",margin:"16px 0 8px",letterSpacing:"1px"}}, "DNEVNI CHECK-IN"));
+  var lf = h("div", {className: "scrd"});
+  lf.appendChild(h("h3", {style:{color:"#fff",margin:"0 0 12px",fontSize:"14px"}}, "Zabeleži danes"));
+
+  var grid = h("div", {className: "grid2"});
+  [["kcal","Kalorije","2550"],["protein","Protein (g)","200"],["fat","Maščobe (g)","85"],["carbs","OH (g)","220"]].forEach(function(f) {
+    var fg = h("div", {className: "fg"});
+    fg.appendChild(h("label", {className: "fl"}, f[1]));
+    var inp = h("input", {className: "fi", type: "number", placeholder: f[2]});
+    inp.value = S.nutrForm[f[0]] || "";
+    inp.oninput = function() { S.nutrForm[f[0]] = inp.value; };
+    fg.appendChild(inp);
+    grid.appendChild(fg);
+  });
+  lf.appendChild(grid);
+
+  var fg3 = h("div", {className: "fg"});
+  fg3.appendChild(h("label", {className: "fl"}, "Po planu?"));
+  var pbr = h("div", {style:{display:"flex",gap:"7px"}});
+  ["da","ne","približno"].forEach(function(opt) {
+    var btn = h("button", {className: "plan-btn" + (S.nutrForm.onPlan === opt ? " on" : ""), onClick: function() { S.nutrForm.onPlan = opt; render(); }}, opt === "da" ? "✓ Da" : opt === "ne" ? "✗ Ne" : "~ Približno");
+    pbr.appendChild(btn);
+  });
+  fg3.appendChild(pbr);
+  lf.appendChild(fg3);
+
+  var saveNBtn = h("button", {className: "btn btn-red", onClick: function() {
+    var D = getData();
+    D.nutritionLogs.push({ date: todayStr(), week: D.week, kcal: Number(S.nutrForm.kcal)||0, protein: Number(S.nutrForm.protein)||0, fat: Number(S.nutrForm.fat)||0, carbs: Number(S.nutrForm.carbs)||0, onPlan: S.nutrForm.onPlan||"da", ts: Date.now() });
+    save(D); S.nutrForm = {};
+    toast("🥩 Prehrana zabeležena!");
+    render();
+  }}, "🥩 Zabeleži prehrano");
+  lf.appendChild(saveNBtn);
+  ct.appendChild(lf);
+  app.appendChild(ct);
+}
+
+function renderMealDetail(key, ct) {
+  var p = NUTR[key];
+  ct.appendChild(h("button", {className: "back-btn", onClick: function() { S.selMeal = null; render(); }}, "← Nazaj"));
+  ct.appendChild(h("h2", {style:{color:"#fff",margin:"0 0 3px",fontSize:"18px"}}, p.label));
+  var macros = h("div", {style:{display:"flex",gap:"8px",marginBottom:"14px",flexWrap:"wrap"}});
+  macros.appendChild(h("span", {className:"mt"}, p.kcal+"kcal"));
+  macros.appendChild(h("span", {className:"mt",style:{color:"#ff6b6b"}}, "P:"+p.p+"g"));
+  macros.appendChild(h("span", {className:"mt",style:{color:"#ffd43b"}}, "M:"+p.f+"g"));
+  macros.appendChild(h("span", {className:"mt",style:{color:"#69db7c"}}, "OH:"+p.c+"g"));
+  ct.appendChild(macros);
+  p.meals.forEach(function(meal) {
+    var mc = h("div", {className: "meal-card"});
+    mc.appendChild(h("div", {style:{display:"flex",justifyContent:"space-between"}}, [h("span", {style:{color:"#fff",fontWeight:700,fontSize:"13px"}}, meal.n), h("span", {style:{color:"#666",fontSize:"12px"}}, meal.t)]));
+    mc.appendChild(h("p", {style:{margin:"6px 0 3px",color:"#ccc",fontSize:"13px",lineHeight:"1.4"}}, meal.i));
+    mc.appendChild(h("p", {style:{margin:0,color:"#666",fontSize:"11px"}}, meal.m));
+    ct.appendChild(mc);
+  });
+}
+
+function renderShopping(ct) {
+  ct.appendChild(h("button", {className: "back-btn", onClick: function() { S.selMeal = null; render(); }}, "← Nazaj"));
+  ct.appendChild(h("h2", {style:{color:"#fff",margin:"0 0 3px",fontSize:"18px"}}, "🛒 Nakupovalni seznam"));
+  ct.appendChild(h("p", {style:{color:"#666",fontSize:"11px",margin:"0 0 16px"}}, "Brez lososa, oreščkov, mandljev"));
+
+  ["weekly","monWed","thuSun"].forEach(function(key) {
+    var sec = SHOP[key];
+    var hdr = h("div", {style:{display:"flex",alignItems:"center",gap:"8px",margin:"16px 0 8px"}});
+    hdr.appendChild(h("div", {style:{width:"4px",height:"18px",borderRadius:"2px",background:sec.color}}));
+    var info = h("div");
+    info.appendChild(h("div", {style:{fontSize:"14px",color:"#fff",fontWeight:700}}, sec.label));
+    info.appendChild(h("div", {style:{fontSize:"10px",color:"#666"}}, sec.sub));
+    hdr.appendChild(info);
+    ct.appendChild(hdr);
+
+    sec.cats.forEach(function(cat) {
+      var card = h("div", {className: "scrd", style:{borderLeft:"3px solid "+sec.color+"40",marginBottom:"6px"}});
+      card.appendChild(h("h4", {style:{margin:"0 0 8px",fontSize:"13px",color:"#ccc"}}, cat.cat));
+      cat.items.forEach(function(item, ii) {
+        var row = h("div", {style:{display:"flex",justifyContent:"space-between",padding:"5px 0",borderBottom: ii < cat.items.length-1 ? "1px solid #1a1a1a" : "none"}});
+        row.appendChild(h("span", {style:{color:"#ddd",fontSize:"12px"}}, item[0]));
+        row.appendChild(h("span", {style:{color:sec.color,fontSize:"12px",fontWeight:700}}, item[1]));
+        card.appendChild(row);
+      });
+      ct.appendChild(card);
+    });
+  });
+
+  var tip = h("div", {className: "scrd", style:{background:"#0a1a1a",borderColor:"#00bcd430"}});
+  tip.appendChild(h("p", {style:{margin:0,fontSize:"12px",color:"#00bcd4",lineHeight:"1.6"}, innerHTML: "<strong>💡 Nasveti:</strong><br>• Piščanca razdeli po 200g in zamrzni<br>• Riž skuhaj vnaprej za 2-3 dni<br>• Avokado: pol zrel, pol trd<br>• V sredo preveri kaj rabiš za ČET-NED"}));
+  ct.appendChild(tip);
+}
+
+// ============================================
+// PROGRESS VIEW
+// ============================================
+function renderProgress(D) {
+  var ct = h("div", {className: "ct"});
+  ct.appendChild(h("h2", {style:{color:"#fff",margin:"0 0 14px",fontSize:"18px"}}, "Napredek"));
+
+  // AirDyne watts
+  var adData = D.logs.filter(function(l){return l.sType==="VO2max" && l.metrics && l.metrics.avgWatts;}).map(function(l){return {x:l.date,y:Number(l.metrics.avgWatts)};});
+  ct.appendChild(makeChart("airdyne", "AirDyne Watts (VO2max trend)", adData, "#ff3b30", "line"));
+
+  // Sessions per week
+  var byWeek = {};
+  D.logs.forEach(function(l) { if(!byWeek[l.week])byWeek[l.week]={s:0,min:0,rpe:0,rc:0}; byWeek[l.week].s++; if(l.metrics&&l.metrics.duration)byWeek[l.week].min+=Number(l.metrics.duration); if(l.metrics&&l.metrics.rpe){byWeek[l.week].rpe+=Number(l.metrics.rpe);byWeek[l.week].rc++;} });
+  var weekLabels = Object.keys(byWeek).map(function(w){return "T"+w;});
+  var weekSessions = Object.values(byWeek).map(function(w){return w.s;});
+  ct.appendChild(makeChartBar("sessions", "Treningi na teden", weekLabels, weekSessions, "#ff3b30"));
+
+  // 10km
+  if (D.tenKm && D.tenKm.length > 0) {
+    ct.appendChild(makeChart("tenk", "10km čas (min) — Cilj: 40", D.tenKm.map(function(t){return {x:t.date,y:t.time};}), "#ff9500", "line"));
+  }
+
+  // Body weight
+  if (D.bodyWeight && D.bodyWeight.length > 0) {
+    ct.appendChild(makeChart("bw", "Telesna teža (kg)", D.bodyWeight.map(function(b){return {x:b.date,y:b.weight};}), "#34c759", "line"));
+  }
+
+  // Protein
+  if (D.nutritionLogs && D.nutritionLogs.length > 0) {
+    ct.appendChild(makeChartBar("prot", "Protein (g/dan)", D.nutritionLogs.slice(-14).map(function(l){return l.date.slice(5);}), D.nutritionLogs.slice(-14).map(function(l){return l.protein;}), "#ff6b6b"));
+  }
+
+  // Last workouts
+  var hbox = h("div", {className: "chart-box"});
+  hbox.appendChild(h("h4", null, "Zadnji treningi"));
+  var recent = D.logs.slice(-8).reverse();
+  if (recent.length === 0) hbox.appendChild(h("p", {style:{color:"#666",fontSize:"12px"}}, "Še ni treningov."));
+  recent.forEach(function(log) {
+    var row = h("div", {style:{padding:"8px 0",borderBottom:"1px solid #1a1a1a"}});
+    var top = h("div", {style:{display:"flex",justifyContent:"space-between"}});
+    top.appendChild(h("span", {style:{color:"#fff",fontSize:"12px",fontWeight:600}}, log.sTitle));
+    top.appendChild(h("span", {style:{color:"#666",fontSize:"10px"}}, log.date));
+    row.appendChild(top);
+    var mets = h("div", {style:{display:"flex",gap:"8px",marginTop:"3px",flexWrap:"wrap"}});
+    Object.keys(log.metrics||{}).forEach(function(k) {
+      if (log.metrics[k] && k !== "generalNotes") {
+        mets.appendChild(h("span", {style:{color:"#999",fontSize:"10px"}}, (ML[k]||k) + ": " + log.metrics[k]));
+      }
+    });
+    row.appendChild(mets);
+    hbox.appendChild(row);
+  });
+  ct.appendChild(hbox);
+  app.appendChild(ct);
+}
+
+var chartInstances = {};
+function makeChart(id, title, data, color, type) {
+  var box = h("div", {className: "chart-box"});
+  box.appendChild(h("h4", null, title));
+  if (data.length === 0) { box.appendChild(h("p", {style:{color:"#666",fontSize:"12px"}}, "Še ni podatkov.")); return box; }
+  var wrap = h("div", {style:{position:"relative",height:"160px"}});
+  var canvas = h("canvas", {id: "ch_"+id});
+  wrap.appendChild(canvas);
+  box.appendChild(wrap);
+  setTimeout(function() {
+    if (chartInstances[id]) chartInstances[id].destroy();
+    chartInstances[id] = new Chart(canvas, {
+      type: type, data: { labels: data.map(function(d){return d.x;}), datasets: [{ data: data.map(function(d){return d.y;}), borderColor: color, backgroundColor: color+"40", pointBackgroundColor: color, pointRadius: 3, borderWidth: 2, tension: .3, fill: type==="line" }] },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: {display:false} }, scales: { x: { ticks: {color:"#666",font:{size:10}}, grid:{color:"#1a1a1a"} }, y: { ticks: {color:"#666",font:{size:10}}, grid:{color:"#1a1a1a"} } } }
+    });
+  }, 50);
+  return box;
+}
+function makeChartBar(id, title, labels, data, color) {
+  var box = h("div", {className: "chart-box"});
+  box.appendChild(h("h4", null, title));
+  if (data.length === 0) { box.appendChild(h("p", {style:{color:"#666",fontSize:"12px"}}, "Še ni podatkov.")); return box; }
+  var wrap = h("div", {style:{position:"relative",height:"150px"}});
+  var canvas = h("canvas", {id: "ch_"+id});
+  wrap.appendChild(canvas);
+  box.appendChild(wrap);
+  setTimeout(function() {
+    if (chartInstances[id]) chartInstances[id].destroy();
+    chartInstances[id] = new Chart(canvas, {
+      type: "bar", data: { labels: labels, datasets: [{ data: data, backgroundColor: color, borderRadius: 4 }] },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: {display:false} }, scales: { x: { ticks: {color:"#666",font:{size:10}}, grid:{color:"#1a1a1a"} }, y: { ticks: {color:"#666",font:{size:10}}, grid:{color:"#1a1a1a"}, beginAtZero:true } } }
+    });
+  }, 50);
+  return box;
+}
+
+// ============================================
+// SETTINGS VIEW
+// ============================================
+function renderSettings(D) {
+  var ct = h("div", {className: "ct"});
+  ct.appendChild(h("h2", {style:{color:"#fff",margin:"0 0 14px",fontSize:"18px"}}, "Orodja"));
+
+  // Weight
+  var wc = h("div", {className: "scrd"});
+  wc.appendChild(h("h3", {style:{margin:"0 0 10px",fontSize:"14px",color:"#fff"}}, "Zabeleži težo"));
+  var wr = h("div", {style:{display:"flex",gap:"7px"}});
+  var wi = h("input", {className: "fi", type: "number", placeholder: "kg", style:{flex:"1"}});
+  wr.appendChild(wi);
+  wr.appendChild(h("button", {className: "btn btn-red", style:{width:"auto",padding:"11px 18px"}, onClick: function() {
+    if (!wi.value) return;
+    D.bodyWeight = D.bodyWeight||[];
+    var ds = todayStr(), ex = D.bodyWeight.findIndex(function(b){return b.date===ds;});
+    if (ex>=0) D.bodyWeight[ex].weight=Number(wi.value); else D.bodyWeight.push({date:ds,weight:Number(wi.value)});
+    save(D); toast("Teža zabeležena!"); wi.value=""; render();
+  }}, "Shrani"));
+  wc.appendChild(wr);
+  ct.appendChild(wc);
+
+  // 10km
+  var tc = h("div", {className: "scrd"});
+  tc.appendChild(h("h3", {style:{margin:"0 0 10px",fontSize:"14px",color:"#fff"}}, "Zabeleži 10km čas"));
+  var tr = h("div", {style:{display:"flex",gap:"7px"}});
+  var ti = h("input", {className: "fi", type: "number", placeholder: "minute", style:{flex:"1"}});
+  tr.appendChild(ti);
+  tr.appendChild(h("button", {className: "btn btn-red", style:{width:"auto",padding:"11px 18px"}, onClick: function() {
+    if (!ti.value) return;
+    D.tenKm = D.tenKm||[];
+    D.tenKm.push({date:todayStr(),time:Number(ti.value)});
+    save(D); toast("10km čas zabeležen!"); ti.value=""; render();
+  }}, "Shrani"));
+  tc.appendChild(tr);
+  ct.appendChild(tc);
+
+  // Program info
+  var pc = h("div", {className: "scrd"});
+  pc.appendChild(h("h3", {style:{margin:"0 0 10px",fontSize:"14px",color:"#fff"}}, "Program info"));
+  var v = getVO2maxScheme(D.week);
+  pc.appendChild(h("div", {style:{color:"#999",fontSize:"12px",lineHeight:"1.8"}, innerHTML:
+    "<strong style='color:#fff'>Teden:</strong> " + D.week + " / 8<br>" +
+    "<strong style='color:#fff'>Cilj:</strong> VO2max ↑, 10km 55→40 min, cut<br>" +
+    "<strong style='color:#fff'>VO2max:</strong> " + v.label + "<br>" +
+    "<strong style='color:#fff'>Dolgi tek:</strong> " + getLongRunMin(D.week) + " min<br>" +
+    "<strong style='color:#fff'>Moč:</strong> " + getStrengthRounds(D.week) + " krogov<br>" +
+    "<span style='color:#ff3b30'>●</span> 2× VO2max AirDyne<br>" +
+    "<span style='color:#34c759'>●</span> 2× lahek tek<br>" +
+    "<span style='color:#ff9500'>●</span> 1× tempo tek<br>" +
+    "<span style='color:#af52de'>●</span> 3× vzdržljivostna moč<br>" +
+    "<span style='color:#007aff'>●</span> 1× dolgi tek<br>" +
+    "<div style='margin-top:8px;padding-top:8px;border-top:1px solid #1a1a1a'>" +
+    "<strong style='color:#fff'>Periodizacija:</strong><br>T1-2: 4×4 · T3-4: 5×3 · T5-6: 6×3<br>T7: Deload · T8: Evaluacija v Claudu</div>" +
+    "<div style='margin-top:8px;padding-top:8px;border-top:1px solid #1a1a1a'>" +
+    "<strong style='color:#fff'>Prehrana (carb cycling):</strong><br>" +
+    "VO2max: 2750 kcal · Trening: 2550 kcal · Počitek: 2350 kcal<br>Protein vedno: 200g</div>"
+  }));
+  ct.appendChild(pc);
+
+  // HR zones
+  var hrc = h("div", {className: "scrd"});
+  hrc.appendChild(h("h3", {style:{margin:"0 0 10px",fontSize:"14px",color:"#fff"}}, "HR Cone (max ~181 bpm)"));
+  hrc.appendChild(h("div", {style:{color:"#999",fontSize:"12px",lineHeight:"1.8"}, innerHTML:
+    "<strong style='color:#34c759'>Cona 2:</strong> 118-136 bpm<br>" +
+    "<strong style='color:#ff9500'>Cona 3-4:</strong> 145-159 bpm<br>" +
+    "<strong style='color:#ff3b30'>Cona 5:</strong> 163-172 bpm"
+  }));
+  ct.appendChild(hrc);
+
+  // Export/Import
+  var exc = h("div", {className: "scrd"});
+  exc.appendChild(h("h3", {style:{margin:"0 0 10px",fontSize:"14px",color:"#fff"}}, "Backup podatkov"));
+  exc.appendChild(h("button", {className: "btn btn-ghost", style:{marginBottom:"7px"}, onClick: function() {
+    var blob = new Blob([JSON.stringify(D, null, 2)], {type: "application/json"});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a"); a.href = url; a.download = "training-backup-" + todayStr() + ".json"; a.click();
+    toast("Backup izvožen!");
+  }}, "📥 Izvozi JSON backup"));
+  var fileInp = h("input", {type: "file", accept: ".json", style:{display:"none"}, id: "importFile"});
+  fileInp.onchange = function(e) {
+    var f = e.target.files[0]; if(!f) return;
+    var r = new FileReader();
+    r.onload = function(ev) {
+      try { var d = JSON.parse(ev.target.result); if(d.logs!==undefined){save(d);toast("Podatki uvoženi!");render();} else toast("Napačen format!"); }
+      catch(e) { toast("Napaka pri uvozu!"); }
+    };
+    r.readAsText(f);
+  };
+  exc.appendChild(fileInp);
+  exc.appendChild(h("button", {className: "btn btn-ghost", onClick: function() { document.getElementById("importFile").click(); }}, "📤 Uvozi JSON backup"));
+  ct.appendChild(exc);
+
+  // Storage info
+  var sc = h("div", {className: "scrd"});
+  sc.appendChild(h("h3", {style:{margin:"0 0 10px",fontSize:"14px",color:"#fff"}}, "Status"));
+  sc.appendChild(h("div", {style:{fontSize:"11px",color:"#888",lineHeight:"1.8"}},
+    "Storage: localStorage ✅\nLogs: " + (D.logs?D.logs.length:0) + " · Nutrition: " + (D.nutritionLogs?D.nutritionLogs.length:0) + " · Week: " + D.week
+  ));
+  ct.appendChild(sc);
+
+  // Reset
+  ct.appendChild(h("button", {className: "btn", style:{borderColor:"#ff3b3040",color:"#ff3b30",marginTop:"16px"}, onClick: function() {
+    if (confirm("Res želiš ponastaviti VSE podatke?")) {
+      localStorage.removeItem(SK);
+      toast("Vse ponastavljeno!");
+      render();
+    }
+  }}, "⚠️ Ponastavi vse podatke"));
+
+  app.appendChild(ct);
+}
+
+// ============================================
+// INIT
+// ============================================
+render();
+</script>
+</body>
+</html>
